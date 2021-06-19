@@ -2,7 +2,7 @@ from os import name
 import nltk
 from nltk import RegexpParser
 import fileUtil as FileUtil
-
+from ..optimize.optimizer import Optimizer
 class Parser:
 
         def generate_parse_trees(pos_tokens_sentences, treeFileName):
@@ -46,6 +46,7 @@ class Parser:
                 extractions.append(output)
                 print("\033[94m Extraction result for sentence \033[0m \n", output)
             FileUtil.generate_tree_pdf(extractions, treeFileName)
+            Optimizer.optimize_chunks(extractions)
 
         def print_named_entities(pos_sentences):
             named_entities = []
