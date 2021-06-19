@@ -1,7 +1,13 @@
+from .dictionaries import Dictionary
 
 class Optimizer:
 
     def optimize_chunks(chunks):
+        
+        invalid_words = Dictionary.Invalid_Words
+        print(invalid_words.get("wen")) #returns "went"
+        print(invalid_words.get("tmrw")) #returns "NONE" -> does not exist in dictionary
+
         print("Chunks:", chunks)
         for chunk in chunks:
             # chunk_sentence = ' '.join([w for w, t in chunk.leaves()]) convert chunk back to original string
@@ -11,7 +17,7 @@ class Optimizer:
             print("Chunk leaves", chunk_leaves)
             # print(chunk_leaves[0][0]) ##we can access individual tokens like this - 1st word from the 1st token
 
-            
+
 
     
     # def remove_repeating_words(chunk):
