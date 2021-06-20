@@ -1,3 +1,6 @@
+from nlp.lex.tokenizer import Tokenizer
+from nlp.lex.pos_tagger import PosTagger
+from nltk.chunk.regexp import RegexpParser
 from .dictionaries import Dictionary
 import nltk
 from nltk.tokenize.treebank import TreebankWordDetokenizer
@@ -6,21 +9,56 @@ class Optimizer:
 
     def optimize_chunks(chunks):
         print("CHUNKS HERE:", chunks)
+        trees = []
+        sentences = []
         
         for chunk in chunks:
             # chunk_sentence = ' '.join([w for w, t in chunk.leaves()]) 
             # print(chunk_sentence)
-            tree = nltk.tree.Tree.fromstring(str(chunk))
-            Optimizer.check_subject_verb_agreement(tree)
-            Optimizer.remove_pronoun_errors(tree)
-            Optimizer.split_independent_clauses(tree)
+            trees.append( nltk.tree.Tree.fromstring(str(chunk)))
+        
+        for tree in trees:
+            p1_changed, p1_sentence = Optimizer.check_subject_verb_agreement(tree)
+            if p1_changed:
+                tree = Optimizer.regenerate_parse_tree(p1_sentence)
             
+            p2_changed, p2_sentence = Optimizer.remove_pronoun_errors(tree)
+            if p2_changed:
+                tree = Optimizer.regenerate_parse_tree(p2_sentence)   
 
+            p3_changed, p3_sentences = Optimizer.split_independent_clauses(tree)
+            if p3_changed:
+                for sentence in p3_sentences:
+                    sentences.append(sentence)
+            else:
+                sentences.append(p3_sentences[0])
             # chunk_leaves = chunk.leaves() #this functions provides us with a list of tokens from the chunk with their POS
             # print("Chunk leaves", chunk_leaves)
             # print(chunk_leaves[0][0]) ##we can access individual tokens like this - 1st word from the 1st token
 
+        print("OPTIMIZED SENTENCES:", sentences)
+        text = ' '.join(['. '.join(sentences)])
+        print("OPTIMIZED TEXT:", text)
+        return text
 
+    def regenerate_parse_tree(sentence):
+        print(sentence)
+        pos_sentence = PosTagger.tag_pos(Tokenizer.tokenize(sentence))
+
+        grammar = RegexpParser("""
+                                IC: {<PRP> <V.*> <TO>? <DT>? <NN.*>? <CC>? <NN.*>? <V.*>?}
+                                PS: {<PRP> <VBP> <DT>? <IN>? <PR.*> <NN.*>}
+                                VP: {<RB>? <CC>? <V.*> <P.*> <IN> <DT> <NN.*>}          #To extract Verb Phrases
+                                SV1: {<NN.*> <CC> <NN.*>}
+                                SV2: {<NN.*> <CC>}
+                                NP: {<DT>?<JJ.*>*<NN.*>+}   #To extract Noun Phrases
+                                PP: {<IN> <NP>}              #To extract Prepositional Phrases
+                                FW: {<FW>}                 #To extract Foreign Words
+                                CD : {<CD>}                #To extract Cardinal Digits 
+                                PRP: {<PRP.*>}              #To extract all Pronouns
+                                """)
+        output = grammar.parse(pos_sentence)
+        return nltk.tree.Tree.fromstring(str(output))
 
     # def remove_repeating_words(chunk):
     #     #eg. He he went to to the gym. -> He went to the gym.
@@ -52,6 +90,8 @@ class Optimizer:
         pos_tokens = Optimizer.convert_leaves_to_tokens(chunk.leaves())
         old_sentence = Optimizer.reconstruct_sentence(pos_tokens)
         sentence_updated = False
+        sentence = ''
+        changed = False
     
         for idx,leaf in enumerate(chunk.subtrees()):
             if leaf.label() == 'SV1':
@@ -81,8 +121,14 @@ class Optimizer:
             print(old_sentence)
             print('\033[94m============UPDATED SENTENCE============\033[0m \n ')     
             print(updated_sentence) 
+            sentence = updated_sentence
+            changed = True
         else:
-            print("No change detected")  
+            print("No change detected")
+            sentence = old_sentence
+            changed = False
+        
+        return changed, sentence  
         
 
 
@@ -96,6 +142,8 @@ class Optimizer:
         singular_pronouns = ['I','it','her','him','you']
         sentence_updated = False
         is_plural_noun = False
+        sentence = ''
+        changed = False
 
         for idx,i in enumerate(chunk.subtrees()):
             if i.label() == 'PS':
@@ -128,9 +176,16 @@ class Optimizer:
             print('\033[94m============OLD SENTENCE============\033[0m \n ')
             print(old_sentence)
             print('\033[94m============UPDATED SENTENCE============\033[0m \n ')     
-            print(updated_sentence)   
+            print(updated_sentence)
+            sentence = updated_sentence   
+            changed = True
         else:
             print("No change detected")  
+            sentence = old_sentence
+            changed = False
+        
+        return changed, sentence
+        
 
     def split_independent_clauses(chunk):
         print('\033[94mSPLITTING INDEPENDENT CLAUSES...\033[0m \n ')
@@ -140,21 +195,30 @@ class Optimizer:
         old_sentence = Optimizer.reconstruct_sentence(leaves)
         clauses_updated = False
         independent_clauses = []
+        changed = False
         
         for subtree in chunk.subtrees():
             if subtree.label() == 'IC':
-                pos_tokens = Optimizer.convert_leaves_to_tokens(subtree.leaves())
-                sentence = Optimizer.reconstruct_sentence(pos_tokens)
-                independent_clauses.append(sentence)
-                clauses_updated = True
+                if (len(subtree.leaves()) > 2):
+                    pos_tokens = Optimizer.convert_leaves_to_tokens(subtree.leaves())
+                    sentence = Optimizer.reconstruct_sentence(pos_tokens)
+                    independent_clauses.append(sentence)
+                    clauses_updated = True
         
         if(clauses_updated):
             print('\033[94m============OLD SENTENCE============\033[0m \n ')
             print(old_sentence)
             print('\033[94m============INDEPENDENT CLAUSES============\033[0m \n ')     
-            print(independent_clauses)               
+            print(independent_clauses)
+            changed = True               
         else:
-            print("No change detected")  
+            independent_clauses.append(old_sentence)
+            print("No change detected")
+        
+        return changed, independent_clauses
+            
+        
+
         
     # def remove_redundant_apostrophes(chunk):
     #     redundant_apostrophes = Dictionary.Redundant_Apostrophes

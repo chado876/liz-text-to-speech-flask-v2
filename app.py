@@ -69,11 +69,12 @@ def upload_text():
     randNum = randrange(1,900)
     parse_tree_name = "parse-tree-"+str(randNum)+".pdf" 
     pos_sentences = LexicalAnalyzer.perform_lexical_analysis(text)
+    optimized = Parser.parse(pos_sentences)
 
     filename = secure_filename("temp" + str(randNum))
-    speechUtil.synthesize_and_save_to_file(text, filename)
+    speechUtil.synthesize_and_save_to_file(optimized, filename)
     data = {'audio':filename+".mp3",
-            'text':text}
+            'text':optimized}
     return jsonify(data)
 
 @app.route('/audio/<string:name>', methods=['GET'])

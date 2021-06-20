@@ -48,7 +48,28 @@ class Parser:
                 extractions.append(output)
                 print("\033[94m Extraction result for sentence \033[0m \n", output)
             FileUtil.generate_tree_pdf(extractions, treeFileName)
-            Optimizer.optimize_chunks(extractions)
+        
+        def parse(pos_tokens_sentences):
+        #Extract all parts of speech from any text 
+        #RegexpParser 
+            grammar = RegexpParser("""
+                                IC: {<PRP> <V.*> <TO>? <DT>? <NN.*>? <CC>? <NN.*>? <V.*>?}
+                                PS: {<PRP> <VBP> <DT>? <IN>? <PR.*> <NN.*>}
+                                VP: {<RB>? <CC>? <V.*> <P.*> <IN> <DT> <NN.*>}          #To extract Verb Phrases
+                                SV1: {<NN.*> <CC> <NN.*>}
+                                SV2: {<NN.*> <CC>}
+                                NP: {<DT>?<JJ.*>*<NN.*>+}   #To extract Noun Phrases
+                                PP: {<IN> <NP>}              #To extract Prepositional Phrases
+                                FW: {<FW>}                 #To extract Foreign Words
+                                CD : {<CD>}                #To extract Cardinal Digits 
+                                PRP: {<PRP.*>}              #To extract all Pronouns
+                                """)
+            extractions = []
+            for x in pos_tokens_sentences:  #parse sentences one by one
+                output = grammar.parse(x) 
+                extractions.append(output)
+                print("\033[94m Extraction result for sentence \033[0m \n", output)
+            return Optimizer.optimize_chunks(extractions)
 
         # def print_named_entities(pos_sentences):
         #     named_entities = []
