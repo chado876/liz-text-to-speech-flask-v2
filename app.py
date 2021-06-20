@@ -106,7 +106,7 @@ def parse():
         parse_tree_name = "parse-tree-"+str(randNum)+".pdf" 
         pos_sentences = LexicalAnalyzer.perform_lexical_analysis(text)
         Parser.generate_parse_trees(pos_sentences, parse_tree_name)
-        Parser.print_named_entities(pos_sentences)
+        # Parser.print_named_entities(pos_sentences)
         data = {'tree':parse_tree_name}
         return jsonify(data)
     except:
