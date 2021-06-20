@@ -12,5 +12,5 @@ pip install PyPDF2
 pip install docx2txt
 pip install python-pptx
 pip install pyttsx3
-pip install newspaper
+pip install newspaper3k
 ```
