@@ -53,11 +53,11 @@ class Parser:
         #Extract all parts of speech from any text 
         #RegexpParser 
             grammar = RegexpParser("""
-                                IC: {<PRP> <V.*> <TO>? <DT>? <NN.*>? <CC>? <NN.*>? <V.*>?}
                                 PS: {<PRP> <VBP> <DT>? <IN>? <PR.*> <NN.*>}
+                                IC: {<PRP> <V.*> <TO>? <DT>? <NN.*>? <CC>? <NN.*>? <NN.*>? <V.*>?}
                                 VP: {<RB>? <CC>? <V.*> <P.*> <IN> <DT> <NN.*>}          #To extract Verb Phrases
                                 SV1: {<NN.*> <CC> <NN.*>}
-                                SV2: {<NN.*> <CC>}
+                                SV2: {<NN.*> <V.*>}
                                 NP: {<DT>?<JJ.*>*<NN.*>+}   #To extract Noun Phrases
                                 PP: {<IN> <NP>}              #To extract Prepositional Phrases
                                 FW: {<FW>}                 #To extract Foreign Words
@@ -70,6 +70,8 @@ class Parser:
                 extractions.append(output)
                 print("\033[94m Extraction result for sentence \033[0m \n", output)
             return Optimizer.optimize_chunks(extractions)
+
+            
 
         # def print_named_entities(pos_sentences):
         #     named_entities = []

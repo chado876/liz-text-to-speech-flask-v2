@@ -46,11 +46,11 @@ class Optimizer:
         pos_sentence = PosTagger.tag_pos(Tokenizer.tokenize(sentence))
 
         grammar = RegexpParser("""
-                                IC: {<PRP> <V.*> <TO>? <DT>? <NN.*>? <CC>? <NN.*>? <V.*>?}
                                 PS: {<PRP> <VBP> <DT>? <IN>? <PR.*> <NN.*>}
+                                IC: {<PRP> <V.*> <TO>? <DT>? <NN.*>? <CC>? <NN.*>? <V.*>?}
                                 VP: {<RB>? <CC>? <V.*> <P.*> <IN> <DT> <NN.*>}          #To extract Verb Phrases
                                 SV1: {<NN.*> <CC> <NN.*>}
-                                SV2: {<NN.*> <CC>}
+                                SV2: {<NN.*> <V.*>}
                                 NP: {<DT>?<JJ.*>*<NN.*>+}   #To extract Noun Phrases
                                 PP: {<IN> <NP>}              #To extract Prepositional Phrases
                                 FW: {<FW>}                 #To extract Foreign Words
@@ -107,7 +107,7 @@ class Optimizer:
             if leaf.label() == 'SV2':
                 for idx,token in enumerate(pos_tokens):
                     sentence_updated = True
-                    if token[1] == 'VBD':
+                    if token[1] == 'VBD' or token[0] == 'are':
                         old_token = token
                         new_token = []
                         new_token.append('is')
@@ -139,7 +139,7 @@ class Optimizer:
         leaves = Optimizer.convert_leaves_to_tokens(chunk.leaves())
         old_sentence = Optimizer.reconstruct_sentence(leaves)
         sentence_updated = False
-        singular_pronouns = ['I','it','her','him','you']
+        singular_pronouns = ['it','her','him','you']
         sentence_updated = False
         is_plural_noun = False
         sentence = ''
@@ -148,13 +148,12 @@ class Optimizer:
         for idx,i in enumerate(chunk.subtrees()):
             if i.label() == 'PS':
                 for leaf in leaves:
+                    print(leaf)
                     if leaf[1] == 'NNS':
                         is_plural_noun = True
-                    elif leaf[1] == 'NN':
-                        is_plural_noun = False
             elif i.label() == 'VP':
                 for x,leaf in enumerate(leaves):
-                    if leaf[1] == 'PRP' and is_plural_noun and leaf[0] in singular_pronouns:
+                    if leaf[1] == 'PRP' and x!=0 and is_plural_noun and leaf[0] in singular_pronouns:
                         old_leaf = leaf
                         new_leaf = []
                         new_leaf.append('them')
@@ -162,7 +161,7 @@ class Optimizer:
                         leaves[x] = new_leaf
                         sentence_updated = True
                         print("\033[91m",old_leaf,'\033[0m',' ----------> ','\033[92m',new_leaf,'\033[0m')
-                    elif leaf[1] == 'PRP' and not is_plural_noun and leaf[0] not in singular_pronouns:
+                    elif leaf[1] == 'PRP' and x != 0 and not is_plural_noun and leaf[0] not in singular_pronouns:
                         old_leaf = leaf
                         new_leaf = []
                         new_leaf.append('it')
@@ -199,7 +198,7 @@ class Optimizer:
         
         for subtree in chunk.subtrees():
             if subtree.label() == 'IC':
-                if (len(subtree.leaves()) > 2):
+                if (len(subtree.leaves()) > 3):
                     pos_tokens = Optimizer.convert_leaves_to_tokens(subtree.leaves())
                     sentence = Optimizer.reconstruct_sentence(pos_tokens)
                     independent_clauses.append(sentence)
