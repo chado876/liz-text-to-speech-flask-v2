@@ -4,11 +4,12 @@ from nltk.chunk.regexp import RegexpParser
 from .dictionaries import Dictionary
 import nltk
 from nltk.tokenize.treebank import TreebankWordDetokenizer
+from nltk.corpus import wordnet
 
 class Optimizer:
 
     def optimize_chunks(chunks):
-        print("CHUNKS HERE:", chunks)
+        # print("CHUNKS HERE:", chunks)
         trees = []
         sentences = []
         
@@ -18,6 +19,14 @@ class Optimizer:
             trees.append( nltk.tree.Tree.fromstring(str(chunk)))
         
         for tree in trees:
+            tree = Optimizer.remove_repeating_words(tree)
+
+            tree = Optimizer.replace_invalid_words(tree)
+
+            tree = Optimizer.replace_incomplete_words(tree)
+
+            tree = Optimizer.remove_grammar_redundancies(tree)
+            
             p1_changed, p1_sentence = Optimizer.check_subject_verb_agreement(tree)
             if p1_changed:
                 tree = Optimizer.regenerate_parse_tree(p1_sentence)
@@ -35,10 +44,14 @@ class Optimizer:
             # chunk_leaves = chunk.leaves() #this functions provides us with a list of tokens from the chunk with their POS
             # print("Chunk leaves", chunk_leaves)
             # print(chunk_leaves[0][0]) ##we can access individual tokens like this - 1st word from the 1st token
-
-        print("OPTIMIZED SENTENCES:", sentences)
-        text = ' '.join(['. '.join(sentences)])
-        print("OPTIMIZED TEXT:", text)
+       
+       
+       ##LAST THING TO RUN!
+        text = ' '.join(['. '.join(sentences)])        
+        unique_sentences = Optimizer.remove_repeating_sentences(sentences)
+        print(unique_sentences)
+        text =  ' '.join(['. '.join(unique_sentences)])
+        print(text)
         return text
 
     def regenerate_parse_tree(sentence):
@@ -60,26 +73,99 @@ class Optimizer:
         output = grammar.parse(pos_sentence)
         return nltk.tree.Tree.fromstring(str(output))
 
-    # def remove_repeating_words(chunk):
-    #     #eg. He he went to to the gym. -> He went to the gym.
+    #This function removes duplicate words from sentence
+    def remove_repeating_words(chunk): #eg. "He he went to to the gym." -> He went to the gym.
+        noduplist = [] #An empty list 
+        leaves = Optimizer.convert_leaves_to_tokens(chunk.leaves())
 
-    # def remove_repeating_sentences(chunk):
-    #     #eg. He went to the gym. He went to the gym. -> He went to the gym.
+        
+        for leaf in leaves: #Goes through every elements in the list that contains duplicate entries 
+            lowercase_list = [word.lower() for word in noduplist]
+            
+            if leaf[0].lower() not in lowercase_list: #Add all unique elements to a newlist 
+               noduplist.append(leaf[0])   
 
-    # def replace_incomplete_words(chunk):
-    #     #eg. He wen to th gym. -> He went to the gym.
+        sentence = TreebankWordDetokenizer().detokenize(noduplist)
+        tree = Optimizer.regenerate_parse_tree(sentence)
+        return tree  #returns the new list                   
+                
+   
+
+    def remove_repeating_sentences(sentence): #eg. He went to the gym. He went to the gym. -> He went to the gym.
+        noduplsentence = [] #An empty list 
+        
+        for element in sentence: #Goes through every elements in the list that contains duplicate entries 
+            lowercase_list = [word.lower() for word in noduplsentence]
+            
+            if element.lower() not in lowercase_list: #Add all unique elements to a newlist 
+                noduplsentence.append(element)  
+        return noduplsentence  #returns the new list  
+
+        
+    def replace_incomplete_words(chunk): #eg. He wen to th gym. -> He went to the gym.
+        dicti = Dictionary.Informal_Words
+        updated_tokens = []
+        leaves = Optimizer.convert_leaves_to_tokens(chunk.leaves())
+        
+        for leaf in leaves:
+            if dicti.get(leaf[0]):
+               print(dicti.get(leaf[0]))
+               new_word = dicti.get(leaf[0])
+               print("\033[91m",leaf[0],'\033[0m',' ----------> ','\033[92m',new_word,'\033[0m')
+               leaf[0] = new_word
+            updated_tokens.append(leaf[0])
+        sentence = TreebankWordDetokenizer().detokenize(updated_tokens)
+        tree = Optimizer.regenerate_parse_tree(sentence)
+        return tree
     
-    # def replace_invalid_words(chunk):
-    #     #eg. He ewnt to hte gim -> He went to the gym.
+    def replace_invalid_words(chunk):  #eg. He ewnt to hte gim -> He went to the gym.
+        invalid_dicti = Dictionary.Invalid_Words
+        updated_tokens = []
+        leaves = Optimizer.convert_leaves_to_tokens(chunk.leaves())
+
+        for leaf in leaves:
+            if invalid_dicti.get(leaf[0]):
+               new_word = invalid_dicti.get(leaf[0])
+               print("\033[91m",leaf[0],'\033[0m',' ----------> ','\033[92m',new_word,'\033[0m')
+               leaf[0] = new_word
+            updated_tokens.append(leaf[0])
+        sentence = TreebankWordDetokenizer().detokenize(updated_tokens)
+        tree = Optimizer.regenerate_parse_tree(sentence)
+        return tree
+
+         #     #eg. Afterwards he went to the gym -> Afterwards, he went to the gym.
+         #     #eg. I am not angry with you, I am not happy with you, either. -> I am not angry with you. I am not happy with you, either.
+    
+       #eg. She stopped pouring water because she thought it was adequate enough.
+        # -> She stopped poruing water because she thought it was enough.
+    def remove_grammar_redundancies(chunk):
+        tokens = Optimizer.convert_leaves_to_tokens(chunk.leaves())            
+        # for syn in synonyms.lemma_names():
+        #     print(syn)
+        token_words = []
+        for token in tokens:
+            token_words.append(token[0])
+        
+        for indx,token in enumerate(token_words):
+            synonyms = []
+            for syn in wordnet.synsets(token): ##we use nltk's wordnet synonym library
+                for lemma in syn.lemma_names():
+                    synonyms.append(lemma)
+            print("SYNONYMS:", synonyms)
+            if((indx+1) < len(token_words) and token_words[indx+1] and token_words[indx+1] in synonyms):
+                print("WE NEED TO GET RID OF:", token_words[indx+1])
+                token_words.pop(indx+1)
+                break
+        
+        sentence = TreebankWordDetokenizer().detokenize(token_words)
+        tree = Optimizer.regenerate_parse_tree(sentence)
+        return tree
 
     # def optimize_grammar_punctuations(chunk):
     #     #eg. Afterwards he went to the gym -> Afterwards, he went to the gym.
     #     #eg. I am not angry with you, I am not happy with you, either. -> I am not angry with you. I am not happy with you, either.
-    
-    # def remove_grammar_redundancies(chunk):
-    #     #eg. She stopped pouring water because she thought it was adequate enough.
-    #     # -> She stopped poruing water because she thought it was enough.
-    
+        
+            
     # def check_verb_tense(chunk):
     #     #eg. I walk to the store and I bought milk. ->
     #     # I walked to te store and I bought milk.
@@ -242,8 +328,17 @@ class Optimizer:
         sentence = TreebankWordDetokenizer().detokenize(tokens)
         return sentence
 
-tree = nltk.tree.Tree.fromstring(""" (S
-  (IC I/PRP am/VBP a/DT boy/NN)
-  (IC I/PRP went/VBD to/TO the/DT shop/NN))""")
+# tree = nltk.tree.Tree.fromstring(""" (S
+#   (IC I/PRP am/VBP a/DT boy/NN)
+#   (IC I/PRP went/VBD to/TO the/DT shop/NN))""")
 
-Optimizer.check_subject_verb_agreement(tree)
+# # Optimizer.check_subject_verb_agreement(tree)
+# teststring = ["He", "he","went", "to", "to", "the", "gym", "." ] 
+# teststring2 = ["active"]
+# #["Hey", "yee", "hepl", "th", "gym"]
+
+
+# print(teststring)
+# #print(teststring2)
+# print(Optimizer.remove_repeating_words(teststring))
+# print(Optimizer.remove_grammar_redundancies(teststring2))
