@@ -20,7 +20,6 @@ class Tokenizer:
         return n_gram_tokens
 
     def remove_stop_words(tokens):
-        nltk.download('stopwords')  #download nltk's stopword library
         stop_words = nltk.corpus.stopwords.words('english') #assign english stop words
 
         token_stop_words = [sw for sw in tokens if sw and sw in stop_words] #strip stop words from tokens

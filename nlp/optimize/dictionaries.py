@@ -5,3 +5,6 @@ class Dictionary:
         'hte' : 'the',
         'wen' : 'went'
         })
+    
+
+
