@@ -15,6 +15,5 @@ def process_article(articleLink, fileName):
     articleText = article.text
     randNum = randrange(1,900)
     
-    speechUtil.synthesize_and_save_to_file(articleText, fileName)
     return articleText
     

@@ -49,9 +49,11 @@ def upload_file():
             parse_tree_name = "parse-tree-"+str(randNum)+".pdf" 
             text = fileUtil.readFromFile(filename, parse_tree_name)
             pos_tokens = LexicalAnalyzer.perform_lexical_analysis(text)
+            optimized = Parser.parse(pos_tokens)
             fileNameWithoutExt = (filename.rsplit( ".", 1 )[ 0 ] )
+            speechUtil.synthesize_and_save_to_file(optimized, fileNameWithoutExt)
             data = {'audio':fileNameWithoutExt+".mp3",
-                    'text':text}
+                    'text':optimized}
             if(pos_tokens):
                 return jsonify(data)
             else:
@@ -89,9 +91,11 @@ def process_article():
     articleAudioFile = filename = "article" + str(randNum)
     articleText = articleUtil.process_article(articleLink, articleAudioFile)
     pos_sentences = LexicalAnalyzer.perform_lexical_analysis(articleText)
+    optimized = Parser.parse(pos_sentences)
+    speechUtil.synthesize_and_save_to_file(articleText, articleAudioFile)
     parse_tree_name = "parse-tree-"+str(randNum)+".pdf" 
     data = {'audio':articleAudioFile+".mp3",
-            'text':articleText}
+            'text':optimized}
     return jsonify(data)
 
 @app.route('/tree/<string:name>', methods=['GET'])
