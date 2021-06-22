@@ -1,5 +1,3 @@
-from os import name
-from typing import Dict
 from nlp.lex.tokenizer import Tokenizer
 from nlp.lex.pos_tagger import PosTagger
 from nltk.chunk.regexp import RegexpParser
@@ -63,7 +61,6 @@ class Optimizer:
 
         grammar = RegexpParser("""
                                 PS: {<PRP> <VBP> <DT>? <IN>? <PR.*> <NN.*>}
-                                IC: {<PRP> <V.*> <TO>? <DT>? <NN.*>? <CC>? <NN.*>? <V.*>?}
                                 VP: {<RB>? <CC>? <V.*> <P.*> <IN> <DT> <NN.*>}          #To extract Verb Phrases
                                 SV1: {<NN.*> <CC> <NN.*>}
                                 SV2: {<NN.*> <V.*>}
@@ -377,7 +374,7 @@ class Optimizer:
     
 
         grammar = RegexpParser("""
-                                IC: {<PRP> <V.*> <TO>? <DT>? <NN.*>? <CC>? <NN.*>? <V.*>? <NN.*>}
+                                IC: {<PRP> <V.*> <IN>? <PRP.*>? <NN.*>? <NN.*>? <TO>? <DT>? <NN.*>? <CC>? <NN.*>? <V.*>? <NN.*>}
                                 """)
         
         chunk = nltk.tree.Tree.fromstring(str(grammar.parse(pos_sentence)))
