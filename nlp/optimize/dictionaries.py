@@ -34,5 +34,23 @@ class Dictionary:
         'sry'   : 'sorry'
     })
 
-    
+    Redundant_Apostrophes = dict({
+        "girls's": "girls'",
+        "boys'" : "boys'",
+        "mens'" : "men's",
+        "womens'" : "women's"
+    })
+
+    Tense_1 = dict({
+        "walk" : "walked",
+        "run" : "ran"
+    })
+
+    Entities = dict({
+        "kfc" : "KFC",
+        "john": "John"
+    })
+
+
+
 
