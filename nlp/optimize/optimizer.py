@@ -42,7 +42,7 @@ class Optimizer:
             
             p10_changed, p10_sentence = Optimizer.remove_pronoun_errors(tree)
             if p10_changed:
-                tree = Optimizer.regenerate_parse_tree(p9_sentence)   
+                tree = Optimizer.regenerate_parse_tree(p10_sentence)   
 
             p11_changed, p11_sentences = Optimizer.split_independent_clauses(tree)
             if p11_changed:
@@ -53,7 +53,6 @@ class Optimizer:
        
        
        ##LAST PROCESS - REMOVE DUPLICATE SENTENCES
-        text = ' '.join(['. '.join(sentences)])        
         unique_sentences = Optimizer.remove_repeating_sentences(sentences)
         text =  ' '.join(['. '.join(unique_sentences)])
         print('\033[94mOPTIMIZED TEXT...\033[0m \n ', text)
@@ -88,7 +87,6 @@ class Optimizer:
             token_words.append(token[0])
         
         for indx,word in enumerate(token_words): #Goes through every elements in the list that contains duplicate entries 
-            lowercase_list = [x.lower() for x in noduplist]
             if((indx+1) < len(token_words)):
                 iter = indx + 1
                 while iter < len(token_words)  and token_words[indx+1] and token_words[indx+1].lower() == word.lower():
@@ -447,11 +445,6 @@ class Optimizer:
         tree = Optimizer.regenerate_parse_tree(sentence)
 
         return tree
-
-        
-
-
-
 
     def convert_leaves_to_tokens(leaves):
         tokens = []
