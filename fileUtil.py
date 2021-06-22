@@ -45,7 +45,6 @@ def readFromFile(fileName, treeFileName):
                 for shape in slide.shapes:
                     if hasattr(shape, "text"):
                         text += shape.text
-            speechUtil.synthesize_and_save_to_file(text, fileNameWithoutExt)
     except:
         print("An error occurred!")
     return text
