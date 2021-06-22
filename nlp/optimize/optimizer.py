@@ -1,3 +1,5 @@
+from os import name
+from typing import Dict
 from nlp.lex.tokenizer import Tokenizer
 from nlp.lex.pos_tagger import PosTagger
 from nltk.chunk.regexp import RegexpParser
@@ -26,6 +28,14 @@ class Optimizer:
             tree = Optimizer.replace_incomplete_words(tree)
 
             tree = Optimizer.remove_grammar_redundancies(tree)
+
+            tree = Optimizer.remove_redundant_apostrophes(tree)
+
+            Optimizer.capitalize_entities(tree)
+
+            p8_changed, p8_sentence = Optimizer.check_verb_tense(tree)
+            if p8_changed:
+                tree = Optimizer.regenerate_parse_tree(p8_sentence)
             
             p1_changed, p1_sentence = Optimizer.check_subject_verb_agreement(tree)
             if p1_changed:
@@ -151,9 +161,8 @@ class Optimizer:
             for syn in wordnet.synsets(token): ##we use nltk's wordnet synonym library
                 for lemma in syn.lemma_names():
                     synonyms.append(lemma)
-            print("SYNONYMS:", synonyms)
             if((indx+1) < len(token_words) and token_words[indx+1] and token_words[indx+1] in synonyms):
-                print("WE NEED TO GET RID OF:", token_words[indx+1])
+                print("\033[91mTO BE REMOVED:\033[0m ", token_words[indx+1])
                 token_words.pop(indx+1)
                 break
         
@@ -166,9 +175,80 @@ class Optimizer:
     #     #eg. I am not angry with you, I am not happy with you, either. -> I am not angry with you. I am not happy with you, either.
         
             
-    # def check_verb_tense(chunk):
-    #     #eg. I walk to the store and I bought milk. ->
-    #     # I walked to te store and I bought milk.
+    def check_verb_tense(chunk):
+        #eg. I walk to the store and I bought milk. ->
+        # I walked to te store and I bought milk.
+        pos_tokens = Optimizer.convert_leaves_to_tokens(chunk.leaves())
+        old_sentence = Optimizer.reconstruct_sentence(pos_tokens)
+        pos_tags = []
+        words = []
+        sentence_updated = False
+        sentence = Optimizer.reconstruct_sentence(pos_tokens)
+        pos_sentence = PosTagger.tag_pos(Tokenizer.tokenize(sentence))
+        changed = False
+
+        tense_1 = Dictionary.Tense_1
+
+        for pos in pos_tokens:
+            pos_tags.append(pos[1])
+        
+        for token in pos_tokens:
+            words.append(token[0])
+
+        grammar = RegexpParser("""
+                                X: {<PRP> <VBP> <TO> <DT> <NN.*> <CC> <VBD> <NN.*>}
+                                Y: {<PRP> <VBD> <TO>? <NN.*>? <DT>? <RB>? <VB> <NN.*>?}
+                                """)
+        
+        output = grammar.parse(pos_sentence)
+        print("PARSED OUTPUT:", output)
+
+        for leaf in output.subtrees():
+            if(leaf.label() == 'X'):
+                for idx,token in enumerate(pos_tokens):
+                    if token[1] == 'VBP':
+                        sentence_updated = True
+                        old_token = token
+                        new_token = []
+                        if tense_1.get(token[0]):
+                            new_token.append(tense_1.get(token[0]))
+                            new_token.append('VBD')
+                        else:
+                            new_token.append(token[0] + 'ed')
+                            new_token.append('VBD')
+
+                        pos_tokens[idx] = new_token
+                        print("\033[91m",old_token,'\033[0m',' ----------> ','\033[92m',new_token,'\033[0m')
+            elif(leaf.label() == 'Y'):
+                for idx,token in enumerate(pos_tokens):
+                    if token[1] == 'VB':
+                        sentence_updated = True
+                        old_token = token
+                        new_token = []
+                        if tense_1.get(token[0]):
+                            new_token.append(tense_1.get(token[0]))
+                            new_token.append('VBD')
+                        else:
+                            new_token.append(token[0] + 'ed')
+                            new_token.append('VBD')
+
+                        pos_tokens[idx] = new_token
+                        print("\033[91m",old_token,'\033[0m',' ----------> ','\033[92m',new_token,'\033[0m')
+
+        if(sentence_updated):
+            updated_sentence = Optimizer.reconstruct_sentence(pos_tokens)    
+            print('\033[94m============OLD SENTENCE============\033[0m \n ')
+            print(old_sentence)
+            print('\033[94m============UPDATED SENTENCE============\033[0m \n ')     
+            print(updated_sentence) 
+            sentence = updated_sentence
+            changed = True
+        else:
+            print("No change detected")
+            sentence = old_sentence
+            changed = False
+        
+        return changed, sentence  
     
     def check_subject_verb_agreement(chunk):
         print('\033[94mCHECKING SUBJECT VERB AGREEMENT...\033[0m \n ')
@@ -281,15 +361,24 @@ class Optimizer:
         clauses_updated = False
         independent_clauses = []
         changed = False
+
+        pos_sentence = PosTagger.tag_pos(Tokenizer.tokenize(old_sentence))
+    
+
+        grammar = RegexpParser("""
+                                IC: {<PRP> <V.*> <TO>? <DT>? <NN.*>? <CC>? <NN.*>? <V.*>? <NN.*>}
+                                """)
+        
+        chunk = nltk.tree.Tree.fromstring(str(grammar.parse(pos_sentence)))
         
         for subtree in chunk.subtrees():
             if subtree.label() == 'IC':
-                if (len(subtree.leaves()) > 3):
+                if (subtree.leaves()):
                     pos_tokens = Optimizer.convert_leaves_to_tokens(subtree.leaves())
                     sentence = Optimizer.reconstruct_sentence(pos_tokens)
+                    sentence = sentence.capitalize()
                     independent_clauses.append(sentence)
                     clauses_updated = True
-        
         if(clauses_updated):
             print('\033[94m============OLD SENTENCE============\033[0m \n ')
             print(old_sentence)
@@ -305,13 +394,47 @@ class Optimizer:
         
 
         
-    # def remove_redundant_apostrophes(chunk):
-    #     redundant_apostrophes = Dictionary.Redundant_Apostrophes
-    #     eg. The girls's soccer game was delayed by rain. ->
-    #     The girls' soccer game was delayed by rain.
+    def remove_redundant_apostrophes(chunk):
+        print('\033[94mCHECKING FOR REDUNDANT APOSTROPHES...\033[0m \n ')
+        redundant_apostrophes = Dictionary.Redundant_Apostrophes
+        # eg. The girls's soccer game was delayed by rain. ->
+        # The girls' soccer game was delayed by rain.
+        updated_tokens = []
+        tokens = Optimizer.convert_leaves_to_tokens(chunk.leaves())
+        
+        for token in tokens:
+            if redundant_apostrophes.get(token[0]):
+               new_word = redundant_apostrophes.get(token[0])
+               print("\033[91m",token[0],'\033[0m',' ----------> ','\033[92m',new_word,'\033[0m')
+               token[0] = new_word
+            updated_tokens.append(token[0])
+        sentence = TreebankWordDetokenizer().detokenize(updated_tokens)
+        tree = Optimizer.regenerate_parse_tree(sentence)
+        return tree
 
-    # def capitalize_entities(chunk):
-        #eg. germany won the match although portugal started very well -> Germany won the match although portugal started very well.
+
+    def capitalize_entities(chunk):
+        # eg. germany won the match although portugal started very well -> Germany won the match although portugal started very well.
+        tokens = Optimizer.convert_leaves_to_tokens(chunk.leaves())
+        sentence = Optimizer.reconstruct_sentence(tokens)
+        pos_sentence = PosTagger.tag_pos(Tokenizer.tokenize(sentence))
+        entities = Dictionary.Entities
+
+        for indx,token in enumerate(pos_sentence):
+            if token[1] == 'NN' or token[1] == 'NNS':
+                # if token[0] in entities:
+                #     print("NEW WORD,:", token[0].capitalize())
+                if entities.get(token[0]):
+                    print("NEW WORD,:", entities.get(token[0]))
+                    new_token = []
+                    new_token.append('NNP')
+                    new_token.append(entities.get(token[0]))
+                    pos_sentence[indx] = new_token
+        
+        print("NEW TOKENS:", pos_sentence)
+
+
+
 
     def convert_leaves_to_tokens(leaves):
         tokens = []

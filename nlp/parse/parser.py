@@ -9,7 +9,6 @@ class Parser:
             #Extract all parts of speech from any text 
             #RegexpParser 
             grammar = RegexpParser("""
-                                IC: {<PRP> <V.*> <TO>? <DT>? <NN.*>? <CC>? <NN.*>? <V.*>?}
                                 PS: {<PRP> <VBP> <DT>? <IN>? <PR.*> <NN.*>}
                                 VP: {<RB>? <CC>? <V.*> <P.*> <IN> <DT> <NN.*>}          #To extract Verb Phrases
                                 SV1: {<NN.*> <CC> <NN.*>}
@@ -54,7 +53,6 @@ class Parser:
         #RegexpParser 
             grammar = RegexpParser("""
                                 PS: {<PRP> <VBP> <DT>? <IN>? <PR.*> <NN.*>}
-                                IC: {<PRP> <V.*> <TO>? <DT>? <NN.*>? <CC>? <NN.*>? <NN.*>? <V.*>?}
                                 VP: {<RB>? <CC>? <V.*> <P.*> <IN> <DT> <NN.*>}          #To extract Verb Phrases
                                 SV1: {<NN.*> <CC> <NN.*>}
                                 SV2: {<NN.*> <V.*>}
