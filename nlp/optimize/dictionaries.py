@@ -24,30 +24,38 @@ class Dictionary:
         })
     
     Informal_Words = dict({
-        'ntn' : 'nothing',
-        'bby'  : 'baby',
-        'ppl': 'people',
-        'qte'  : 'cute',
-        'num' : 'number',
-        'pls' : 'please',
-        're' : 'regarding',
-        'sry'   : 'sorry',
-        'th': 'the',
-        'min':'mintue',
-        'dnt':'dont',
-        'jus':'just',
-        'u':'you',
-        'hw':'how',
-        'luv':'love',
+            'ntn' : 'nothing',
+            'bby'  : 'baby',
+            'ppl': 'people',
+            'qte'  : 'cutie',
+            'num' : 'number',
+            'pls' : 'please',
+            're' : 'regarding',
+            'sry'   : 'sorry',
+            'th': 'the',
+            'thnx' : 'thanks',
+            'k' : 'ok',
+            'gr8' : 'great',
+            'b4' : 'before',
+            'dl' : 'download',
+            'l8r' : 'later',
+            'msg' : 'message',
+            'ne1' : 'anyone',
+            'noob' : 'newbie',
+            'txt' : 'text',
+            'w8' : 'wait',
+            'zzz' : 'sleeping',
+            'luv' : 'love'
+        })
 
-
-    })
 
     Redundant_Apostrophes = dict({
         "girls's": "girls'",
         "boys'" : "boys'",
         "mens'" : "men's",
-        "womens'" : "women's"
+        "womens'" : "women's",
+        "dogs's" : "dog's",
+        "cats's": "cats'"
     })
 
     Patois_Words = dict({
@@ -64,13 +72,13 @@ class Dictionary:
         'fluffy' : 'fat',
         'todeh' : 'today',
         'nyam' : 'eat',
+         'yuh':'you',
         'wah': 'what',
         'gwan':'go',
         'bex':'upset',
         'yesideh':'yesterday',
         'pon':'on',
         'nuff':'inquisitive',
-        'yuh':'you',
         'nah':'not',
         'mi':'me',
         'wah':'what',
@@ -78,7 +86,48 @@ class Dictionary:
         'fi':'for',
         'weh':'where',
         'suh':'so'
+    })
 
+    Tense_1 = dict({
+        "arise" : "arose",
+        "babysit" : "babysat",
+        "become" : "became",
+        "bend" : "bent",
+        "bind" : "bound",
+        "bite" : "bit",
+        "bleed" : "bled",
+        "blow": "blew",
+        "breed" : "bred",
+        "bring" : "brought",
+        "build" : "built",
+        "buy" : "bought",
+        "catch" : "caught",
+        "choose" : "chose",
+        "come" : "came",
+        "deal" : "delt",
+        "dig" : "dug",
+        "do" : "did",
+        "draw" : "drew",
+        "drink" : "drank",
+        "drive" : "drove",
+        "eat" : "ate",
+        "fall" : "fell",
+        "feed" : "fed",
+        "feel" : "felt",
+        "forgive" : "forgave",
+        "freeze" : "froze",
+        "get" : "got",
+        "give" : "gave",
+        "go" : "went",
+        "grow" : "grew",
+        "have" : "had",
+        "hear" : "heard",
+        "hold" : "held",
+        "keep" : "kept",
+        "lose" : "lost",
+        "make"  : "made",
+        "mean" : "meant",
+        "pay" : "paid",
     })
 
     Tense_1 = dict({
@@ -132,12 +181,6 @@ class Dictionary:
         "mrs":"Mrs",
         "mr":"Mr",
         "japan":"Japan",
-       
-
-
-
-
-
     })
 
 
