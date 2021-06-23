@@ -55,18 +55,73 @@ class Dictionary:
         'mawga' : 'slim',
         'fluffy' : 'fat',
         'todeh' : 'today',
-        'nyam' : 'eat'
+        'nyam' : 'eat',
+        'wah': 'what',
+        'gwan':'go',
+        'bex':'upset',
+        'yesideh':'yesterday',
+        'pon':'on',
+        'nuff':'inquisitive',
 
     })
 
     Tense_1 = dict({
         "walk" : "walked",
         "run" : "ran"
+         
     })
 
     Entities = dict({
         "kfc" : "KFC",
-        "john": "John"
+        "john": "John",
+      "jamaica": "Jamaica",
+      "germany":"Germany",
+      "paul":"Paul",
+      "china":"China",
+      "facebook":"Facebook",
+        "andrew":"Andrew",
+        "holness":"Holness",
+        "sean":"Sean",
+        "thorpe":"Thorpe",
+        "chad":"Chad",
+        "danielle":"Danielle",
+        "akielia":"Akielia",
+        "shericka":"Shericka",
+        "kingston":"Kingston",
+        "america":"America",
+        "google":"Google",
+        "monday":"Monday",
+        "tuesday":"Tuesday",
+        "wednesday":"Wednesday",
+        "thursday":"Thursday",
+        "friday":"Friday",
+        "saturday":"Saturday",
+        "sunday":"Sunday",
+        "january":"January",
+        "febuary":"Febuary",
+        "march":"March",
+        "april":"April",
+        "may":"May",
+        "june":"June",
+        "july":"July",
+        "august":"August",
+        "september":"September",
+        "october":"October",
+        "november":"Novemeber",
+        "december":"December",
+        "paris":"Paris",
+        "amazon":"Amazon",
+        "christmas":"Christmas",
+        "easter":"Easter",
+        "mrs":"Mrs",
+        "mr":"Mr",
+        "japan":"Japan",
+       
+
+
+
+
+
     })
 
 
