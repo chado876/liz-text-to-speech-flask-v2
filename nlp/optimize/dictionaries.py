@@ -48,6 +48,7 @@ class Dictionary:
             'luv' : 'love'
         })
 
+
     Redundant_Apostrophes = dict({
         "girls's": "girls'",
         "boys'" : "boys'",
@@ -72,6 +73,12 @@ class Dictionary:
         'todeh' : 'today',
         'nyam' : 'eat',
          'yuh':'you',
+        'wah': 'what',
+        'gwan':'go',
+        'bex':'upset',
+        'yesideh':'yesterday',
+        'pon':'on',
+        'nuff':'inquisitive',
         'nah':'not',
         'mi':'me',
         'wah':'what',
@@ -123,8 +130,14 @@ class Dictionary:
         "pay" : "paid",
     })
 
+    Tense_1 = dict({
+        "walk" : "walked",
+        "run" : "ran"
+         
+    })
+
     Entities = dict({
-    "kfc" : "KFC",
+        "kfc" : "KFC",
         "john": "John",
       "jamaica": "Jamaica",
       "germany":"Germany",
