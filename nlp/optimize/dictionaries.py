@@ -32,7 +32,15 @@ class Dictionary:
         'pls' : 'please',
         're' : 'regarding',
         'sry'   : 'sorry',
-        'th': 'the'
+        'th': 'the',
+        'min':'mintue',
+        'dnt':'dont',
+        'jus':'just',
+        'u':'you',
+        'hw':'how',
+        'luv':'love',
+
+
     })
 
     Redundant_Apostrophes = dict({
@@ -62,6 +70,14 @@ class Dictionary:
         'yesideh':'yesterday',
         'pon':'on',
         'nuff':'inquisitive',
+        'yuh':'you',
+        'nah':'not',
+        'mi':'me',
+        'wah':'what',
+        'lef':'leave',
+        'fi':'for',
+        'weh':'where',
+        'suh':'so'
 
     })
 
