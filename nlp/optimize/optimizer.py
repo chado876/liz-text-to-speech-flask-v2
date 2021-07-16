@@ -423,7 +423,7 @@ class Optimizer:
 
     def capitalize_entities(chunk):
         print('\033[94mCAPITALIZED NAMED ENTITIES...\033[0m \n ')
-        # eg. germany won the match although portugal started very well -> Germany won the match although portugal started very well.
+        # eg. She likes kfc. -> She likes KFC.
         tokens = Optimizer.convert_leaves_to_tokens(chunk.leaves())
         sentence = Optimizer.reconstruct_sentence(tokens)
         pos_sentence = PosTagger.tag_pos(Tokenizer.tokenize(sentence))

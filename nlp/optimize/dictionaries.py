@@ -45,7 +45,8 @@ class Dictionary:
             'txt' : 'text',
             'w8' : 'wait',
             'zzz' : 'sleeping',
-            'luv' : 'love'
+            'luv' : 'love',
+            'pj' : 'pajamas'
         })
 
     Redundant_Apostrophes = dict({
